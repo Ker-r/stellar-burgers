@@ -1,21 +1,45 @@
 import { FC, useMemo } from 'react';
+import { useSelector } from '../../services/store';
+import { useParams } from 'react-router-dom';
+import type { RootState } from '../../services/store';
+
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  // 👇 Берём ингредиенты
+  const { ingredients } = useSelector((state: RootState) => state.ingredients);
 
-  const ingredients: TIngredient[] = [];
+  // 👇 Берём заказы И из ленты, И из истории
+  const feedOrders = useSelector((state: RootState) => state.feed.orders);
+  const profileOrders = useSelector((state: RootState) => state.orders);
+
+  // 👇 Получаем номер заказа из URL
+  const { number } = useParams<{ number: string }>();
+
+  /* Находим нужный заказ: сначала ищем в ленте, потом в истории */
+  const orderData = useMemo(() => {
+    if (!number) return null;
+
+    const orderNumber = Number(number);
+
+    // Сначала ищем в общей ленте
+    const foundInFeed = feedOrders.find(
+      (order) => order.number === orderNumber
+    );
+    if (foundInFeed) return foundInFeed;
+
+    // Если не нашли, ищем в истории заказов профиля
+    if (profileOrders.orders && profileOrders.orders.length > 0) {
+      const foundInProfile = profileOrders.orders.find(
+        (order) => order.number === orderNumber
+      );
+      if (foundInProfile) return foundInProfile;
+    }
+
+    return null;
+  }, [feedOrders, profileOrders.orders, number]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
