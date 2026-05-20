@@ -20,18 +20,38 @@ export const burgerConstructorSlice = createSlice({
     addIngredient: (state, action: PayloadAction<TIngredient>) => {
       const newItem: TConstructorItem = {
         ...action.payload,
-        id: Math.random().toString(36).substring(2, 9)
+        id: crypto.randomUUID()
       };
       state.ingredients.push(newItem);
     },
+
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.ingredients = state.ingredients.filter(
         (item) => item.id !== action.payload
       );
     },
+    moveIngredient: (
+      state,
+      action: PayloadAction<{ id: string; direction: 'up' | 'down' }>
+    ) => {
+      const { id, direction } = action.payload;
+      const index = state.ingredients.findIndex((item) => item.id === id);
+
+      if (index === -1) return;
+
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+      if (newIndex < 0 || newIndex >= state.ingredients.length) return;
+      [state.ingredients[index], state.ingredients[newIndex]] = [
+        state.ingredients[newIndex],
+        state.ingredients[index]
+      ];
+    },
+
     setBun: (state, action: PayloadAction<TIngredient>) => {
       state.bun = action.payload;
     },
+
     resetConstructor: (state) => {
       state.bun = null;
       state.ingredients = [];
@@ -39,7 +59,12 @@ export const burgerConstructorSlice = createSlice({
   }
 });
 
-export const { addIngredient, removeIngredient, setBun, resetConstructor } =
-  burgerConstructorSlice.actions;
+export const {
+  addIngredient,
+  removeIngredient,
+  moveIngredient,
+  setBun,
+  resetConstructor
+} = burgerConstructorSlice.actions;
 
 export default burgerConstructorSlice.reducer;

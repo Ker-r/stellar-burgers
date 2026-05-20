@@ -1,36 +1,31 @@
-import { FC, useMemo } from 'react';
-import { useSelector } from '../../services/store';
+import { FC, useMemo, useState, useEffect } from 'react';
+import { useSelector, useDispatch } from '../../services/store';
 import { useParams } from 'react-router-dom';
 import type { RootState } from '../../services/store';
+import { getOrderByNumberApi } from '@api';
+import { TIngredient, TOrder } from '@utils-types';
 
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  // 👇 Берём ингредиенты
   const { ingredients } = useSelector((state: RootState) => state.ingredients);
-
-  // 👇 Берём заказы И из ленты, И из истории
   const feedOrders = useSelector((state: RootState) => state.feed.orders);
   const profileOrders = useSelector((state: RootState) => state.orders);
 
-  // 👇 Получаем номер заказа из URL
   const { number } = useParams<{ number: string }>();
+  const dispatch = useDispatch();
 
-  /* Находим нужный заказ: сначала ищем в ленте, потом в истории */
   const orderData = useMemo(() => {
     if (!number) return null;
 
     const orderNumber = Number(number);
 
-    // Сначала ищем в общей ленте
     const foundInFeed = feedOrders.find(
       (order) => order.number === orderNumber
     );
     if (foundInFeed) return foundInFeed;
 
-    // Если не нашли, ищем в истории заказов профиля
     if (profileOrders.orders && profileOrders.orders.length > 0) {
       const foundInProfile = profileOrders.orders.find(
         (order) => order.number === orderNumber
@@ -41,17 +36,34 @@ export const OrderInfo: FC = () => {
     return null;
   }, [feedOrders, profileOrders.orders, number]);
 
-  /* Готовим данные для отображения */
-  const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+  const [remoteOrder, setRemoteOrder] = useState<TOrder | null>(null);
 
-    const date = new Date(orderData.createdAt);
+  useEffect(() => {
+    if (!orderData && number) {
+      getOrderByNumberApi(Number(number))
+        .then((res) => {
+          if (res.success && res.orders.length > 0) {
+            setRemoteOrder(res.orders[0]);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load order details:', err);
+        });
+    }
+  }, [orderData, number]);
+
+  const finalOrderData = orderData || remoteOrder;
+
+  const orderInfo = useMemo(() => {
+    if (!finalOrderData || !ingredients.length) return null;
+
+    const date = new Date(finalOrderData.createdAt);
 
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = orderData.ingredients.reduce(
+    const ingredientsInfo = finalOrderData.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
@@ -76,12 +88,12 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...orderData,
+      ...finalOrderData,
       ingredientsInfo,
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [finalOrderData, ingredients]);
 
   if (!orderInfo) {
     return <Preloader />;

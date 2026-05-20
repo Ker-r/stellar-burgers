@@ -8,7 +8,6 @@ import { IngredientDetailsUI } from '../ui/ingredient-details';
 
 export const IngredientDetails: FC = () => {
   const { ingredients } = useSelector((state: RootState) => state.ingredients);
-
   const { id } = useParams<{ id: string }>();
 
   const ingredientData = useMemo(
@@ -19,5 +18,6 @@ export const IngredientDetails: FC = () => {
   if (!ingredientData) {
     return <Preloader />;
   }
+
   return <IngredientDetailsUI ingredientData={ingredientData} />;
 };
