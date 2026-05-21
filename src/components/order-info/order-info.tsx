@@ -1,23 +1,49 @@
-import { FC, useMemo } from 'react';
-import { Preloader } from '../ui/preloader';
-import { OrderInfoUI } from '../ui/order-info';
+import { FC, useMemo, useEffect } from 'react';
+import { useSelector, useDispatch } from '../../services/store';
+import { useParams } from 'react-router-dom';
+import type { RootState } from '../../services/store';
+import {
+  fetchOrderByNumber,
+  resetCurrentOrder
+} from '../../services/slices/orderSlice';
 import { TIngredient } from '@utils-types';
 
+import { Preloader } from '../ui/preloader';
+import { OrderInfoUI } from '../ui/order-info';
+
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const dispatch = useDispatch();
+  const { number } = useParams<{ number: string }>();
 
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector(
+    (state: RootState) => state.ingredients.ingredients
+  );
+  const feedOrders = useSelector((state: RootState) => state.feed.orders);
+  const profileOrders = useSelector((state: RootState) => state.orders.orders);
+  const currentOrder = useSelector(
+    (state: RootState) => state.order.currentOrder
+  );
+  const localOrder = useMemo(() => {
+    if (!number) return null;
+    const orderNumber = Number(number);
 
-  /* Готовим данные для отображения */
+    return (
+      feedOrders.find((o) => o.number === orderNumber) ||
+      profileOrders.find((o) => o.number === orderNumber) ||
+      null
+    );
+  }, [feedOrders, profileOrders, number]);
+  useEffect(() => {
+    if (!localOrder && number) {
+      dispatch(fetchOrderByNumber(Number(number)));
+    }
+    return () => {
+      dispatch(resetCurrentOrder());
+    };
+  }, [localOrder, number, dispatch]);
+
+  const orderData = localOrder || currentOrder;
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -32,15 +58,11 @@ export const OrderInfo: FC = () => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
           if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
+            acc[item] = { ...ingredient, count: 1 };
           }
         } else {
           acc[item].count++;
         }
-
         return acc;
       },
       {}
