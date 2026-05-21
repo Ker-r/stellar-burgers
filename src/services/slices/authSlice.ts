@@ -99,7 +99,6 @@ export const authSlice = createSlice({
 
       // Выход
       .addCase(logoutUser.fulfilled, (state) => {
-        state.isAuthChecked = false;
         state.user = null;
       });
   }

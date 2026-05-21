@@ -1,5 +1,4 @@
 import { FC, SyntheticEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from '../../services/store';
 import { registerUser } from '../../services/slices/authSlice';
 import { RegisterUI } from '@ui-pages';
@@ -11,7 +10,6 @@ export const Register: FC = () => {
   const [error, setError] = useState('');
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -19,9 +17,6 @@ export const Register: FC = () => {
 
     dispatch(registerUser({ name: userName, email, password }))
       .unwrap()
-      .then(() => {
-        navigate('/login', { replace: true });
-      })
       .catch((err) => {
         setError(err.message || 'Ошибка регистрации');
       });

@@ -97,29 +97,39 @@ const App = () => {
         <Route
           path='/feed/:number'
           element={
-            <Modal title='Детали заказа' onClose={() => navigate('/feed')}>
+            <div className={styles.detailPageWrap}>
+              <p
+                className={`text text_type_digits-default ${styles.detailHeader}`}
+              >
+                #{location.pathname.match(/\d+/)?.[0]}
+              </p>
               <OrderInfo />
-            </Modal>
+            </div>
           }
         />
         <Route
           path='/ingredients/:id'
           element={
-            <Modal title='Детали ингредиента' onClose={() => navigate('/')}>
+            <div className={styles.detailPageWrap}>
+              <p className={`text text_type_main-large ${styles.detailHeader}`}>
+                Детали ингредиента
+              </p>
               <IngredientDetails />
-            </Modal>
+            </div>
           }
         />
         <Route
           path='/profile/orders/:number'
           element={
             <ProtectedRoute>
-              <Modal
-                title='Детали заказа'
-                onClose={() => navigate('/profile/orders')}
-              >
+              <div className={styles.detailPageWrap}>
+                <p
+                  className={`text text_type_digits-default ${styles.detailHeader}`}
+                >
+                  #{location.pathname.match(/\d+/)?.[0]}
+                </p>
                 <OrderInfo />
-              </Modal>
+              </div>
             </ProtectedRoute>
           }
         />
@@ -133,8 +143,8 @@ const App = () => {
             path='/feed/:number'
             element={
               <Modal
-                title='Детали заказа'
-                onClose={() => window.history.back()}
+                title={`#${location.pathname.match(/\d+/)?.[0] ?? ''}`}
+                onClose={() => navigate(-1)}
               >
                 <OrderInfo />
               </Modal>
@@ -143,10 +153,7 @@ const App = () => {
           <Route
             path='/ingredients/:id'
             element={
-              <Modal
-                title='Детали ингредиента'
-                onClose={() => window.history.back()}
-              >
+              <Modal title='Детали ингредиента' onClose={() => navigate(-1)}>
                 <IngredientDetails />
               </Modal>
             }
@@ -156,8 +163,8 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Modal
-                  title='Детали заказа'
-                  onClose={() => window.history.back()}
+                  title={`#${location.pathname.match(/\d+/)?.[0] ?? ''}`}
+                  onClose={() => navigate(-1)}
                 >
                   <OrderInfo />
                 </Modal>

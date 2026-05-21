@@ -1,5 +1,4 @@
 import { FC, SyntheticEvent, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from '../../services/store';
 import { loginUser } from '../../services/slices/authSlice';
 import { LoginUI } from '@ui-pages';
@@ -10,8 +9,6 @@ export const Login: FC = () => {
   const [error, setError] = useState('');
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -19,10 +16,6 @@ export const Login: FC = () => {
 
     dispatch(loginUser({ email, password }))
       .unwrap()
-      .then(() => {
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      })
       .catch((err) => {
         setError(err.message || 'Ошибка входа');
       });

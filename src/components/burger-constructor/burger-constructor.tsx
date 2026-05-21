@@ -1,9 +1,8 @@
 import { FC, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
-import { useNavigate } from 'react-router-dom';
-import { getCookie } from '../../utils/cookie';
-import { resetConstructor } from '../../services/slices/burgerConstructorSlice';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { orderBurger, resetOrderModal } from '../../services/slices/orderSlice';
+import { selectUser } from '../../services/selectors/authSelectors';
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import type { RootState } from '../../services/store';
@@ -11,6 +10,7 @@ import type { RootState } from '../../services/store';
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { bun, ingredients } = useSelector(
     (state: RootState) => state.burgerConstructor
@@ -18,13 +18,13 @@ export const BurgerConstructor: FC = () => {
   const { orderRequest, orderModalData } = useSelector(
     (state: RootState) => state.order
   );
+  const user = useSelector(selectUser);
 
   const onOrderClick = useCallback(() => {
     if (!bun || orderRequest) return;
 
-    const token = getCookie('accessToken');
-    if (!token) {
-      navigate('/login', { state: { from: { pathname: '/' } } });
+    if (!user) {
+      navigate('/login', { state: { from: location } });
       return;
     }
 
@@ -35,11 +35,10 @@ export const BurgerConstructor: FC = () => {
     ];
 
     dispatch(orderBurger(ingredientIds));
-  }, [bun, ingredients, orderRequest, dispatch, navigate]);
+  }, [bun, ingredients, orderRequest, user, dispatch, navigate, location]);
 
   const closeOrderModal = useCallback(() => {
     dispatch(resetOrderModal());
-    dispatch(resetConstructor());
   }, [dispatch]);
 
   const price = useMemo(
@@ -52,16 +51,12 @@ export const BurgerConstructor: FC = () => {
     [bun, ingredients]
   );
 
-  const orderForUI = orderModalData
-    ? (orderModalData.order as unknown as import('@utils-types').TOrder)
-    : null;
-
   return (
     <BurgerConstructorUI
       price={price}
       orderRequest={orderRequest}
       constructorItems={{ bun, ingredients }}
-      orderModalData={orderForUI}
+      orderModalData={orderModalData}
       onOrderClick={onOrderClick}
       closeOrderModal={closeOrderModal}
     />
