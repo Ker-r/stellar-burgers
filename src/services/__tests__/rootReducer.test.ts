@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import ingredientsReducer from '../slices/ingredientsSlice';
 import burgerConstructorReducer from '../slices/burgerConstructorSlice';
 import orderReducer from '../slices/orderSlice';
@@ -6,19 +6,18 @@ import authReducer from '../slices/authSlice';
 import feedReducer from '../slices/feedSlice';
 import ordersReducer from '../slices/ordersSlice';
 
-const rootReducer = {
+const rootReducer = combineReducers({
   ingredients: ingredientsReducer,
   burgerConstructor: burgerConstructorReducer,
   order: orderReducer,
   auth: authReducer,
   feed: feedReducer,
   orders: ordersReducer
-};
+});
 
 describe('rootReducer', () => {
-  it('должен корректно инициализировать начальное состояние хранилища', () => {
-    const store = configureStore({ reducer: rootReducer });
-    const state = store.getState();
+  it('при вызове с undefined и неизвестным экшеном возвращает начальное состояние', () => {
+    const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
 
     expect(state).toHaveProperty('ingredients');
     expect(state).toHaveProperty('burgerConstructor');
@@ -28,7 +27,7 @@ describe('rootReducer', () => {
     expect(state).toHaveProperty('orders');
   });
 
-  it('при неизвестном экшене должен вернуть начальное состояние без изменений', () => {
+  it('при неизвестном экшене должен вернуть состояние без изменений', () => {
     const store = configureStore({ reducer: rootReducer });
     const stateBefore = store.getState();
 
