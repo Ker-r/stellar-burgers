@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.routeFromHAR('./tests/hars/api.har', {
-    url: 'https://norma.education-services.ru/api/**',
     notFound: 'fallback'
   });
 });
@@ -71,11 +70,12 @@ test.describe('Конструктор бургера', () => {
 
       await page.locator('[data-cy="ingredient-item"]').first().click();
 
-      await expect(page.locator('[data-cy="modal"]')).toBeVisible();
+      const modal = page.locator('[data-cy="modal"]');
+      await expect(modal).toBeVisible();
 
       await page.locator('[data-cy="modal-close"]').click();
 
-      await expect(page.locator('[data-cy="modal"]')).not.toBeVisible();
+      await expect(modal).not.toBeVisible();
     });
 
     test('должен закрываться по клику на оверлей', async ({ page }) => {
@@ -83,11 +83,12 @@ test.describe('Конструктор бургера', () => {
 
       await page.locator('[data-cy="ingredient-item"]').first().click();
 
-      await expect(page.locator('[data-cy="modal"]')).toBeVisible();
+      const modal = page.locator('[data-cy="modal"]');
+      await expect(modal).toBeVisible();
 
       await page.mouse.click(10, 300);
 
-      await expect(page.locator('[data-cy="modal"]')).not.toBeVisible();
+      await expect(modal).not.toBeVisible();
     });
   });
 

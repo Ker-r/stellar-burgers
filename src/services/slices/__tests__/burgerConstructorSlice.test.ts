@@ -2,7 +2,8 @@ import burgerConstructorReducer, {
   addIngredient,
   removeIngredient,
   moveIngredient,
-  setBun
+  setBun,
+  initialState
 } from '../burgerConstructorSlice';
 import { TIngredient } from '@utils-types';
 
@@ -34,88 +35,79 @@ const mockFilling: TIngredient = {
   image_mobile: 'https://example.com/filling-mobile.png'
 };
 
-const initialState = {
-  bun: null,
-  ingredients: []
-};
-
 describe('burgerConstructorSlice', () => {
   describe('addIngredient', () => {
     it('должен добавлять начинку в конструктор', () => {
       const action = addIngredient(mockFilling);
       const state = burgerConstructorReducer(initialState, action);
 
-      expect(state.ingredients).toHaveLength(1);
-      expect(state.ingredients[0]._id).toBe(mockFilling._id);
-      expect(state.ingredients[0].id).toBeDefined();
+      expect(state).toEqual({
+        ...initialState,
+        ingredients: [expect.objectContaining({ _id: mockFilling._id })]
+      });
     });
 
     it('должен добавлять несколько начинок в конструктор', () => {
-      let state = burgerConstructorReducer(
-        initialState,
-        addIngredient(mockFilling)
-      );
+      let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(mockFilling));
 
-      expect(state.ingredients).toHaveLength(2);
+      expect(state).toEqual({
+        ...initialState,
+        ingredients: [
+          expect.objectContaining({ _id: mockFilling._id }),
+          expect.objectContaining({ _id: mockFilling._id })
+        ]
+      });
     });
   });
 
   describe('removeIngredient', () => {
     it('должен удалять ингредиент из конструктора по id', () => {
-      let state = burgerConstructorReducer(
-        initialState,
-        addIngredient(mockFilling)
-      );
+      let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       const addedId = state.ingredients[0].id;
 
       state = burgerConstructorReducer(state, removeIngredient(addedId));
 
-      expect(state.ingredients).toHaveLength(0);
+      expect(state).toEqual({
+        ...initialState,
+        ingredients: []
+      });
     });
   });
 
   describe('moveIngredient', () => {
     it('должен перемещать ингредиент вверх', () => {
-      let state = burgerConstructorReducer(
-        initialState,
-        addIngredient(mockFilling)
-      );
-      const secondFilling = {
-        ...mockFilling,
-        _id: '3',
-        name: 'Второй ингредиент'
-      };
+      const secondFilling = { ...mockFilling, _id: '3', name: 'Второй ингредиент' };
+      let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(secondFilling));
 
       const secondId = state.ingredients[1].id;
-      state = burgerConstructorReducer(
-        state,
-        moveIngredient({ id: secondId, direction: 'up' })
-      );
+      state = burgerConstructorReducer(state, moveIngredient({ id: secondId, direction: 'up' }));
 
-      expect(state.ingredients[0].name).toBe('Второй ингредиент');
+      expect(state).toEqual({
+        ...initialState,
+        ingredients: [
+          expect.objectContaining({ name: 'Второй ингредиент' }),
+          expect.objectContaining({ name: mockFilling.name })
+        ]
+      });
     });
 
     it('должен перемещать ингредиент вниз', () => {
-      let state = burgerConstructorReducer(
-        initialState,
-        addIngredient(mockFilling)
-      );
-      const secondFilling = {
-        ...mockFilling,
-        _id: '3',
-        name: 'Второй ингредиент'
-      };
+      const secondFilling = { ...mockFilling, _id: '3', name: 'Второй ингредиент' };
+      let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(secondFilling));
 
       const firstId = state.ingredients[0].id;
-      state = burgerConstructorReducer(
-        state,
-        moveIngredient({ id: firstId, direction: 'down' })
-      );
+      state = burgerConstructorReducer(state, moveIngredient({ id: firstId, direction: 'down' }));
 
-      expect(state.ingredients[0].name).toBe('Второй ингредиент');
+      expect(state).toEqual({
+        ...initialState,
+        ingredients: [
+          expect.objectContaining({ name: 'Второй ингредиент' }),
+          expect.objectContaining({ name: mockFilling.name })
+        ]
+      });
     });
   });
 
@@ -123,8 +115,10 @@ describe('burgerConstructorSlice', () => {
     it('должен устанавливать булку в конструктор', () => {
       const state = burgerConstructorReducer(initialState, setBun(mockBun));
 
-      expect(state.bun).not.toBeNull();
-      expect(state.bun?._id).toBe(mockBun._id);
+      expect(state).toEqual({
+        ...initialState,
+        bun: mockBun
+      });
     });
   });
 });

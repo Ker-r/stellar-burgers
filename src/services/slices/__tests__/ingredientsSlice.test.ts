@@ -1,4 +1,7 @@
-import ingredientsReducer, { fetchIngredients } from '../ingredientsSlice';
+import ingredientsReducer, {
+  fetchIngredients,
+  initialState
+} from '../ingredientsSlice';
 import { TIngredient } from '@utils-types';
 
 const mockIngredients: TIngredient[] = [
@@ -30,12 +33,6 @@ const mockIngredients: TIngredient[] = [
   }
 ];
 
-const initialState = {
-  ingredients: [],
-  isLoading: false,
-  error: null
-};
-
 describe('ingredientsSlice', () => {
   it('должен возвращать начальное состояние', () => {
     expect(ingredientsReducer(undefined, { type: 'UNKNOWN_ACTION' })).toEqual(
@@ -48,8 +45,11 @@ describe('ingredientsSlice', () => {
       const action = { type: fetchIngredients.pending.type };
       const state = ingredientsReducer(initialState, action);
 
-      expect(state.isLoading).toBe(true);
-      expect(state.error).toBeNull();
+      expect(state).toEqual({
+        ...initialState,
+        isLoading: true,
+        error: null
+      });
     });
 
     it('при fulfilled должен записывать ингредиенты и устанавливать isLoading в false', () => {
@@ -59,8 +59,11 @@ describe('ingredientsSlice', () => {
       };
       const state = ingredientsReducer(initialState, action);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.ingredients).toEqual(mockIngredients);
+      expect(state).toEqual({
+        ...initialState,
+        isLoading: false,
+        ingredients: mockIngredients
+      });
     });
 
     it('при rejected должен записывать ошибку и устанавливать isLoading в false', () => {
@@ -70,8 +73,11 @@ describe('ingredientsSlice', () => {
       };
       const state = ingredientsReducer(initialState, action);
 
-      expect(state.isLoading).toBe(false);
-      expect(state.error).toBe('Ошибка сети');
+      expect(state).toEqual({
+        ...initialState,
+        isLoading: false,
+        error: 'Ошибка сети'
+      });
     });
   });
 });

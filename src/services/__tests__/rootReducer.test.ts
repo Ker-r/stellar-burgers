@@ -1,4 +1,5 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import { rootReducer } from '../store';
 import ingredientsReducer from '../slices/ingredientsSlice';
 import burgerConstructorReducer from '../slices/burgerConstructorSlice';
 import orderReducer from '../slices/orderSlice';
@@ -6,25 +7,28 @@ import authReducer from '../slices/authSlice';
 import feedReducer from '../slices/feedSlice';
 import ordersReducer from '../slices/ordersSlice';
 
-const rootReducer = combineReducers({
-  ingredients: ingredientsReducer,
-  burgerConstructor: burgerConstructorReducer,
-  order: orderReducer,
-  auth: authReducer,
-  feed: feedReducer,
-  orders: ordersReducer
-});
-
 describe('rootReducer', () => {
-  it('при вызове с undefined и неизвестным экшеном возвращает начальное состояние', () => {
+  it('при вызове с undefined и неизвестным экшеном возвращает корректное начальное состояние', () => {
     const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
 
-    expect(state).toHaveProperty('ingredients');
-    expect(state).toHaveProperty('burgerConstructor');
-    expect(state).toHaveProperty('order');
-    expect(state).toHaveProperty('auth');
-    expect(state).toHaveProperty('feed');
-    expect(state).toHaveProperty('orders');
+    expect(state.ingredients).toEqual(
+      ingredientsReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
+    expect(state.burgerConstructor).toEqual(
+      burgerConstructorReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
+    expect(state.order).toEqual(
+      orderReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
+    expect(state.auth).toEqual(
+      authReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
+    expect(state.feed).toEqual(
+      feedReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
+    expect(state.orders).toEqual(
+      ordersReducer(undefined, { type: 'UNKNOWN_ACTION' })
+    );
   });
 
   it('при неизвестном экшене должен вернуть состояние без изменений', () => {
