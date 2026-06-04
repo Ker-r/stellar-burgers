@@ -16,7 +16,7 @@ type TIngredientsState = {
   error: string | null; // текст ошибки, если произошла
 };
 
-const initialState: TIngredientsState = {
+export const initialState: TIngredientsState = {
   ingredients: [],
   isLoading: false,
   error: null
