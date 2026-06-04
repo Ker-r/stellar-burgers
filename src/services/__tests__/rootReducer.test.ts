@@ -10,25 +10,16 @@ import ordersReducer from '../slices/ordersSlice';
 describe('rootReducer', () => {
   it('при вызове с undefined и неизвестным экшеном возвращает корректное начальное состояние', () => {
     const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
+    const initAction = { type: 'UNKNOWN_ACTION' };
 
-    expect(state.ingredients).toEqual(
-      ingredientsReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
-    expect(state.burgerConstructor).toEqual(
-      burgerConstructorReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
-    expect(state.order).toEqual(
-      orderReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
-    expect(state.auth).toEqual(
-      authReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
-    expect(state.feed).toEqual(
-      feedReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
-    expect(state.orders).toEqual(
-      ordersReducer(undefined, { type: 'UNKNOWN_ACTION' })
-    );
+    expect(state).toEqual({
+      ingredients: ingredientsReducer(undefined, initAction),
+      burgerConstructor: burgerConstructorReducer(undefined, initAction),
+      order: orderReducer(undefined, initAction),
+      auth: authReducer(undefined, initAction),
+      feed: feedReducer(undefined, initAction),
+      orders: ordersReducer(undefined, initAction)
+    });
   });
 
   it('при неизвестном экшене должен вернуть состояние без изменений', () => {

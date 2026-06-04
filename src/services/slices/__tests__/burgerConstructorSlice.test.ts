@@ -38,24 +38,25 @@ const mockFilling: TIngredient = {
 describe('burgerConstructorSlice', () => {
   describe('addIngredient', () => {
     it('должен добавлять начинку в конструктор', () => {
-      const action = addIngredient(mockFilling);
-      const state = burgerConstructorReducer(initialState, action);
+      const state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
+      const addedItem = state.ingredients[0];
 
       expect(state).toEqual({
         ...initialState,
-        ingredients: [expect.objectContaining({ _id: mockFilling._id })]
+        ingredients: [{ ...mockFilling, id: addedItem.id }]
       });
     });
 
     it('должен добавлять несколько начинок в конструктор', () => {
       let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(mockFilling));
+      const [first, second] = state.ingredients;
 
       expect(state).toEqual({
         ...initialState,
         ingredients: [
-          expect.objectContaining({ _id: mockFilling._id }),
-          expect.objectContaining({ _id: mockFilling._id })
+          { ...mockFilling, id: first.id },
+          { ...mockFilling, id: second.id }
         ]
       });
     });
@@ -80,15 +81,15 @@ describe('burgerConstructorSlice', () => {
       const secondFilling = { ...mockFilling, _id: '3', name: 'Второй ингредиент' };
       let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(secondFilling));
+      const [first, second] = state.ingredients;
 
-      const secondId = state.ingredients[1].id;
-      state = burgerConstructorReducer(state, moveIngredient({ id: secondId, direction: 'up' }));
+      state = burgerConstructorReducer(state, moveIngredient({ id: second.id, direction: 'up' }));
 
       expect(state).toEqual({
         ...initialState,
         ingredients: [
-          expect.objectContaining({ name: 'Второй ингредиент' }),
-          expect.objectContaining({ name: mockFilling.name })
+          { ...secondFilling, id: second.id },
+          { ...mockFilling, id: first.id }
         ]
       });
     });
@@ -97,15 +98,15 @@ describe('burgerConstructorSlice', () => {
       const secondFilling = { ...mockFilling, _id: '3', name: 'Второй ингредиент' };
       let state = burgerConstructorReducer(initialState, addIngredient(mockFilling));
       state = burgerConstructorReducer(state, addIngredient(secondFilling));
+      const [first, second] = state.ingredients;
 
-      const firstId = state.ingredients[0].id;
-      state = burgerConstructorReducer(state, moveIngredient({ id: firstId, direction: 'down' }));
+      state = burgerConstructorReducer(state, moveIngredient({ id: first.id, direction: 'down' }));
 
       expect(state).toEqual({
         ...initialState,
         ingredients: [
-          expect.objectContaining({ name: 'Второй ингредиент' }),
-          expect.objectContaining({ name: mockFilling.name })
+          { ...secondFilling, id: second.id },
+          { ...mockFilling, id: first.id }
         ]
       });
     });
